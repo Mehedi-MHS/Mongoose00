@@ -1,10 +1,80 @@
+Mongoose. Clean Note:
+-----------------------------
 With Mongoose, developers must define a Schema and Model.
+-> first define schema(structure), then create model based on the schema.
+
+#installation:
+npm i mongoose.
+
+#Connecting with database:------------------------
+
+import mongoose from 'mongoose'
+
+//database options
+const options = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  dbName: "blog",
+};
+//Connect to database.
+mongoose
+  .connec(
+ "mongodb+srv://",    options
+  )
+  .then(() => console.log("Connected To Database"))
+  .catch((error) => console.error(error));
+
+#Create Schema: ..will write later...
+
+#Create Model : .. will write later...
+
+#Insert Data method 1 (Best method):----------------------
+Alternatively, we can do this in one action using the Mongoose create() method.
+
+// Create a new blog post and insert into database
+const article = await Blog.create({
+  title: 'Awesome Post!',
+  slug: 'awesome-post',
+  published: true,
+  content: 'This is the best post ever',
+  tags: ['featured', 'announcement'],
+});
+
+console.log(article);
+
+This method is much better! Not only can we insert our document, but we also get returned the document along with its _id when we console log it.
+Update data.
+
+#Insert Data method 2: ----------
+const article = new Blog({
+  title: 'Awesome Post!',
+  slug: 'awesome-post',
+  published: true,
+  content: 'This is the best post ever',
+  tags: ['featured', 'announcement'],
+});
+
+// Insert the article in our MongoDB database
+await article.save();
+
+
+
+
+
+
+
+
+
+
+
+With Mongoose, developers must define a Schema and Model.
+-> first define schema(structure), then create model based on the schema.
 
 What is a schema?
 A schema defines the structure of your collection documents. A Mongoose schema maps directly to a MongoDB collection.
 Code Snippet
 
-const blog = new Schema({
+const blog = new mongoose.Schema({
   title: String,
   slug: String,
   published: Boolean,
@@ -45,57 +115,35 @@ Code Snippet
 
 const Blog = mongoose.model('Blog', blog);
 
-copyIcon
-In this example, Blog translates to the blogs collection.
+
+In this example, 'Blog' translates to the 'blogs' collection.
 
 
-Environment setup
-Let’s set up our environment. I’m going to assume you have Node.js installed already.
-We’ll run the following commands from the terminal to get going:
-Code Snippet
-
-1
-
-mkdir mongodb-mongoose
-
-2
-
-cd mongodb-mongoose
-
-3
-
-npm init -y
-
-4
 
 npm i mongoose
 
-5
-
-npm i -D nodemon
-
-6
-
-code .
-
-copyIcon
-This will create the project directory, initialize, install the packages we need, and open the project in VS Code.
-Let’s add a script to our package.json file to run our project. We will also use ES Modules instead of Common JS, so we’ll add the module type as well. This will also allow us to use top-level await.
-Code Snippet
-
-
-  "scripts": {
-   "dev": "nodemon index.js"
-},
- "type": "module",
 
 
 
 
 Connecting to MongoDB
 Now we’ll create the index.js file and use Mongoose to connect to MongoDB.
-
+------
 import mongoose from 'mongoose'
+Way 1: (recommended).. define db name in option object.
+const options={useNewUrlParser:true,useUnifiedTopology:true,dbName:"nameHere"};
+mongoose.connect(URI_string, options);
+
+or 
+
+mongoose.connect(URI_string, options)
+.then(()=>console.log('Connected to database'))
+.catch((err)=>console.error("Connection failed",err));
+
+
+
+
+way 2:using dbName with the URI.
 mongoose.connect("mongodb+srv://<username>:<password>@cluster0.eyhty.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 
 
@@ -127,6 +175,7 @@ export default Blog;
 
 
 Inserting data // method 1
+===========================
 Now that we have our first model and schema set up, we can start inserting data into our database.
 Back in the index.js file, let’s insert a new blog article.
 
