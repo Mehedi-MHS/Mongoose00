@@ -1,0 +1,272 @@
+With Mongoose, developers must define a Schema and Model.
+
+What is a schema?
+A schema defines the structure of your collection documents. A Mongoose schema maps directly to a MongoDB collection.
+Code Snippet
+
+const blog = new Schema({
+  title: String,
+  slug: String,
+  published: Boolean,
+  author: String,
+  content: String,
+ tags: [String],
+ createdAt: Date,
+ updatedAt: Date,
+ comments: [{
+ user: String,
+ content: String,
+ votes: Number
+}]
+});
+
+
+
+With schemas, we define each field and its data type. Permitted types are:
+
+    String
+    Number
+    Date
+    Buffer
+    Boolean
+    Mixed
+    ObjectId
+    Array
+    Decimal128
+    Map
+
+What is a model?
+Models take your schema and apply it to each document in its collection.
+Models are responsible for all document interactions like creating, reading, updating, and deleting (CRUD).
+An important note: the first argument passed to the model should be the singular form of your collection name. Mongoose automatically changes this to the plural form, transforms it to lowercase, and uses that for the database collection name.
+Code Snippet
+
+1
+
+const Blog = mongoose.model('Blog', blog);
+
+copyIcon
+In this example, Blog translates to the blogs collection.
+
+
+Environment setup
+Let’s set up our environment. I’m going to assume you have Node.js installed already.
+We’ll run the following commands from the terminal to get going:
+Code Snippet
+
+1
+
+mkdir mongodb-mongoose
+
+2
+
+cd mongodb-mongoose
+
+3
+
+npm init -y
+
+4
+
+npm i mongoose
+
+5
+
+npm i -D nodemon
+
+6
+
+code .
+
+copyIcon
+This will create the project directory, initialize, install the packages we need, and open the project in VS Code.
+Let’s add a script to our package.json file to run our project. We will also use ES Modules instead of Common JS, so we’ll add the module type as well. This will also allow us to use top-level await.
+Code Snippet
+
+
+  "scripts": {
+   "dev": "nodemon index.js"
+},
+ "type": "module",
+
+
+
+
+Connecting to MongoDB
+Now we’ll create the index.js file and use Mongoose to connect to MongoDB.
+
+import mongoose from 'mongoose'
+mongoose.connect("mongodb+srv://<username>:<password>@cluster0.eyhty.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+
+
+Creating a schema and model
+Before we do anything with our connection, we’ll need to create a schema and model.
+Ideally, you would create a schema/model file for each schema that is needed. So we’ll create a new folder/file structure: model/Blog.js.
+
+import mongoose from 'mongoose';
+const { Schema, model } = mongoose;
+
+const blogSchema = new Schema({
+  title: String,
+  slug: String,
+  published: Boolean,
+  author: String,
+  content: String,
+  tags: [String],
+  createdAt: Date,
+  updatedAt: Date,
+  comments: [{
+    user: String,
+    content: String,
+    votes: Number
+  }]
+});
+
+const Blog = model('Blog', blogSchema);
+export default Blog;
+
+
+Inserting data // method 1
+Now that we have our first model and schema set up, we can start inserting data into our database.
+Back in the index.js file, let’s insert a new blog article.
+
+
+import mongoose from 'mongoose';
+import Blog from './model/Blog';
+
+mongoose.connect("mongodb+srv://mongo:mongo@cluster0.eyhty.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+
+// Create a new blog post object
+const article = new Blog({
+  title: 'Awesome Post!',
+  slug: 'awesome-post',
+  published: true,
+  content: 'This is the best post ever',
+  tags: ['featured', 'announcement'],
+});
+
+// Insert the article in our MongoDB database
+await article.save();
+
+We first need to import the Blog model that we created. Next, we create a new blog object and then use the save() method to insert it into our MongoDB database.
+Let’s add a bit more after that to log what is currently in the database. We’ll use the findOne() method for this.
+// Find a single blog post
+const firstArticle = await Blog.findOne({});
+console.log(firstArticle);
+
+
+Let’s run the code!
+
+npm run dev
+
+You should see the document inserted logged in your terminal.
+
+
+Inserting data // method 2
+In the previous example, we used the save() Mongoose method to insert the document into our database. This requires two actions: instantiating the object, and then saving it.
+Alternatively, we can do this in one action using the Mongoose create() method.
+
+
+// Create a new blog post and insert into database
+const article = await Blog.create({
+  title: 'Awesome Post!',
+  slug: 'awesome-post',
+  published: true,
+  content: 'This is the best post ever',
+  tags: ['featured', 'announcement'],
+});
+
+console.log(article);
+
+
+This method is much better! Not only can we insert our document, but we also get returned the document along with its _id when we console log it.
+Update data
+Mongoose makes updating data very convenient too. Expanding on the previous example, let’s change the title of our article.
+
+article.title = "The Most Awesomest Post!!";
+await article.save();
+console.log(article);
+
+We can directly edit the local object, and then use the save() method to write the update back to the database. I don’t think it can get much easier than that!
+
+Finding data
+Let’s make sure we are updating the correct document. We’ll use a special Mongoose method, findById(), to get our document by its ObjectId.
+
+const article = await Blog.findById("62472b6ce09e8b77266d6b1b").exec();
+console.log(article);
+
+Notice that we use the exec() Mongoose function. This is technically optional and returns a promise. In my experience, it’s better to use this function since it will prevent some head-scratching issues. If you want to read more about it, check out this note in the Mongoose docs about promises.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
